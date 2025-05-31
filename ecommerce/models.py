@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import slugify 
 
 
 
@@ -16,7 +17,14 @@ class BaseModel(models.Model):
 class Category(BaseModel):
     title = models.CharField(max_length=255,unique=True)
     image = models.ImageField(upload_to='category/images/')
+    slug = models.SlugField(null=True,blank=True)
     
+    
+    def save(self,*args,**kwargs):
+        if self.slug is None:
+            self.slug = slugify(self.title)
+        super(Category,self).save(*args,**kwargs)
+        
     def __str__(self):
         return self.title
     
@@ -49,6 +57,7 @@ class Image(BaseModel):
                                 null=True,
                                 blank=True
                                 )
+    is_primary = models.BooleanField(default=False)
     
     def __str__(self):
         return f'{self.product} - {self.image.url}'
