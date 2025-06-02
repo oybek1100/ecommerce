@@ -21,5 +21,5 @@ from root import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('ecommerce/',include('ecommerce.urls',namespace='ecommerce'))
+    path('',include('ecommerce.urls',namespace='ecommerce'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
