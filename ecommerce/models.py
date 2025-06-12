@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
+from phonenumber_field.modelfields import PhoneNumberField
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -72,3 +73,15 @@ class Attribute(BaseModel):
 
     class Meta:
         unique_together = ('product', 'attribute_key', 'attribute_value')
+
+
+class Customers(BaseModel):
+    full_name = models.CharField(max_length=255)
+    email = models.CharField(unique=True)
+    phone = PhoneNumberField(unique=True, region='UZ')
+    address = models.CharField(max_length=255 , null=True, blank=True)
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.full_name} - {self.email} - {self.phone}'
+
