@@ -45,13 +45,8 @@ class ProductDetail(DetailView):
     pk_url_kwarg = 'product_id'
 
 
-from django.views import View
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from .models import Customers
-import csv, json
 
-class CustomerList(View):
+class CustomerList(View):   
     def get(self, request):
         export_format = request.GET.get('export')
 
@@ -59,15 +54,18 @@ class CustomerList(View):
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename="customers.csv"'
             writer = csv.writer(response)
-            writer.writerow(['full_name', 'email', 'phone', 'address']) 
+            writer.writerow(['full_name', 'email']) 
             for c in Customers.objects.all():
-                writer.writerow([c.full_name, c.email, c.phone, c.address])
+                writer.writerow([c.full_name, c.email])  
             return response
 
         elif export_format == 'json':
-            data = list(Customers.objects.values('full_name', 'email', 'phone', 'address'))
-            return HttpResponse(json.dumps(data, indent=4), content_type='application/json')
+            data = list(Customers.objects.values('full_name', 'email'))
+            response = HttpResponse(json.dumps(data, indent=4), content_type='application/json')
+            response['Content-Disposition'] = 'attachment; filename="customers.json"'  
+            return response
 
+      
         customers = Customers.objects.all()
         return render(request, 'ecommerce/cutomers.html', {'customer': customers})
 
@@ -79,50 +77,11 @@ class CustomerList(View):
             decoded = file.read().decode('utf-8').splitlines()
             reader = csv.DictReader(decoded)
             for row in reader:
-                full_name = row.get('full_name', '').strip()
-                email = row.get('email', '').strip()
-                phone = row.get('phone', '').strip()
-                address = row.get('address', '').strip()
-
-                if not email or not phone:
-                    continue  
-
-                try:
-                    Customers.objects.update_or_create(
-                        email=email,
-                        defaults={
-                            'full_name': full_name,
-                            'phone': phone,
-                            'address': address or None
-                        }
-                    )
-                except KeyError:
-                    continue
+                Customers.objects.create(**row)
 
         elif format == 'json':
-            try:
-                data = json.loads(file.read().decode('utf-8'))
-                for item in data:
-                    full_name = item.get('full_name', '').strip()
-                    email = item.get('email', '').strip()
-                    phone = item.get('phone', '').strip()
-                    address = item.get('address', '').strip() if item.get('address') else None
-
-                    if not email or not phone:
-                        continue
-
-                    try:
-                        Customers.objects.update_or_create(
-                            email=email,
-                            defaults={
-                                'full_name': full_name,
-                                'phone': phone,
-                                'address': address
-                            }
-                        )
-                    except KeyError:
-                        continue
-            except json.JSONDecodeError:
-                return HttpResponse("❌ err ", status=400)
+            data = json.loads(file.read().decode('utf-8'))
+            for item in data:
+                Customers.objects.create(**item)
 
         return redirect('customers')
