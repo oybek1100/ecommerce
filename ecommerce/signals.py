@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from django.conf import settings
 import os 
 import json
+from django.core.mail import send_mail
 
 @receiver(post_save, sender=Product)
 def send_massage(sender ,  created , instance , **kwargs):
@@ -11,6 +12,13 @@ def send_massage(sender ,  created , instance , **kwargs):
         print("Product Created")
         print(f"Product Name : {instance.name}")
         print(f"Product Price : {instance.price}")
+        send_mail(
+            "Subject here",
+            "Here is the message.",
+            "oybek20051113@gmail.com",
+            # [for ],
+            fail_silently=False,
+        )
     
 
 @receiver(pre_delete, sender=Product)

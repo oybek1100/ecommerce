@@ -21,5 +21,11 @@ from root import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',include('ecommerce.urls',namespace='ecommerce'))
+    path('',include('ecommerce.urls',namespace='ecommerce')),
+    path('',include('users.urls',namespace='users')),
+    path('auth/', include('social_django.urls', namespace='social')),
+
+
+
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
